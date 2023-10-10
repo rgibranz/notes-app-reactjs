@@ -1,10 +1,25 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
-import './index.css'
+import {createBrowserRouter, RouterProvider} from "react-router-dom";
+
+import './App.css'
+
+import LoginForm from "./LoginForm.jsx";
+import Notes from "./Notes.jsx";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <LoginForm/>,
+  },
+  {
+    path: "/notes",
+    element: <Notes/>
+  }
+]);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+    <RouterProvider router={router}/>
+  </React.StrictMode>
 )
