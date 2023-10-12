@@ -1,34 +1,59 @@
-import {useState} from 'react';
+import { useState } from "react";
 import axios from "axios";
-import {useNavigate} from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
+import { ReactDOM } from "react";
 function LoginForm() {
+  let [email, setEmail] = useState("");
+  let [password, setPassword] = useState("");
+  let [formError, setFormError] = useState("");
+  let [formErrorList, setFormErrorList] = useState("");
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const handleLogin = async (e) => {
     e.preventDefault();
+    setFormError(undefined);
+    setFormErrorList(undefined);
 
     axios
-      .post('http://localhost:8080/login', {email, password})
+      .post("http://localhost:8080/login", { email, password })
       .then((response) => {
-        localStorage.setItem('Authorization', response.data.token);
-        navigate('/notes')
-      }).catch((e) => {
-      console.log(e);
-    });
-  }
+        localStorage.setItem("Authorization", response.data.token);
+        navigate("/notes");
+      })
+      .catch((e) => {
+        if (Array.isArray(e.response.data.error)) {
+          setFormErrorList(e.response.data.error);
+        } else {
+          setFormError(e.response.data.error);
+        }
+      });
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-gray-400">
       <div className="bg-white p-8 rounded shadow-md w-96">
         <h2 className="text-2xl font-semibold mb-4 text-center">Login</h2>
+        {formError && (
+          <div className="bg-red-500 text-white p-2 rounded mb-4">
+            {formError}
+          </div>
+        )}
+        {formErrorList && (
+          <div className="bg-red-500 text-white p-2 rounded mb-4">
+            <ul>
+              {formErrorList.map((item, index) => (
+                <li key={index}>
+                  {item.msg} {item.path}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         <form onSubmit={handleLogin}>
           <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-600">Email</label>
+            <label htmlFor="email" className="block text-gray-600">
+              Email
+            </label>
             <input
               type="email"
               id="email"
@@ -38,7 +63,9 @@ function LoginForm() {
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="password" className="block text-gray-600">Password</label>
+            <label htmlFor="password" className="block text-gray-600">
+              Password
+            </label>
             <input
               type="password"
               id="password"
@@ -62,4 +89,4 @@ function LoginForm() {
   );
 }
 
-export default LoginForm
+export default LoginForm;
