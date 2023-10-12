@@ -1,14 +1,27 @@
 import { useState } from "react";
 import axios from "axios";
 import { FaInfoCircle, FaTrash, FaPencilAlt } from "react-icons/fa";
+import { useNavigate } from "react-router";
 
 function Notes() {
   const [notes, setNotes] = useState([]);
+  const navigate = useNavigate();
+
   axios.defaults.headers.common["Authorization"] =
     localStorage.getItem("Authorization");
-  axios.get("http://localhost:8080/note").then((response) => {
-    setNotes(response.data);
-  });
+
+  axios
+    .get("http://localhost:8080/note")
+    .then((response) => {
+      // mengeset data notes yang dimiliki user
+      setNotes(response.data);
+    })
+    .catch((e) => {
+      // jika tidak terotorisasi maka ke halaman login
+      if (e.response.status == 401) {
+        navigate("/");
+      }
+    });
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-gray-400">
