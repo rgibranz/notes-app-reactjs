@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { ReactDOM } from "react";
+
 function LoginForm() {
   let [email, setEmail] = useState("");
   let [password, setPassword] = useState("");
@@ -13,7 +13,7 @@ function LoginForm() {
     e.preventDefault();
     setFormError(undefined);
     setFormErrorList(undefined);
-
+    
     axios
       .post("http://localhost:8080/login", { email, password })
       .then((response) => {
@@ -33,11 +33,15 @@ function LoginForm() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-gray-400">
       <div className="bg-white p-8 rounded shadow-md w-96">
         <h2 className="text-2xl font-semibold mb-4 text-center">Login</h2>
+
+        {/*error bukan list*/}
         {formError && (
           <div className="bg-red-500 text-white p-2 rounded mb-4">
             {formError}
           </div>
         )}
+
+        {/*error bentuk list*/}
         {formErrorList && (
           <div className="bg-red-500 text-white p-2 rounded mb-4">
             <ul>
