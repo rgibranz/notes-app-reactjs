@@ -4,6 +4,7 @@ import { FaInfoCircle, FaTrash, FaPencilAlt } from "react-icons/fa";
 import { useNavigate } from "react-router";
 import Navbar from "./components/Navbar";
 import CreateModal from "./components/CreateModal";
+import Swal from "sweetalert2";
 
 function Notes() {
   const [notes, setNotes] = useState([]);
@@ -38,6 +39,41 @@ function Notes() {
     setIsModalOpen(false);
   };
 
+  const handleDelete = (noteID) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await axios.delete(
+            "http://localhost:8080/note/" + noteID,
+            {
+              headers: {
+                Authorization: localStorage.getItem("Authorization"),
+              },
+            }
+          );
+
+          Swal.fire(
+            'Deleted!',
+            'Your note has been deleted.',
+            'success'
+          );
+
+          fetchData();
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    })
+  };
+
   return (
     <div className="content min-h-screen bg-gradient-to-br from-blue-500 to-gray-400">
       <Navbar />
@@ -68,7 +104,7 @@ function Notes() {
                         <FaInfoCircle />
                       </a>
                       <div>
-                        <button className="mr-2 text-red-600 hover:text-red-800">
+                        <button className="mr-2 text-red-600 hover:text-red-800" onClick={()=>{handleDelete(item.id)}}>
                           <FaTrash />
                         </button>
                         <button className="text-yellow-600 hover:text-yellow-800">
