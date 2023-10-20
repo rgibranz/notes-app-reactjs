@@ -1,35 +1,37 @@
 import React, { useState } from "react";
-import axios  from "axios";
+import axios from "axios";
 import { FaInfoCircle, FaTrash, FaPencilAlt } from "react-icons/fa";
 import { useNavigate } from "react-router";
 import Navbar from "./components/Navbar";
 import CreateModal from "./components/CreateModal";
 import Swal from "sweetalert2";
+import EditModal from "./components/EditModal";
 
 function Notes() {
   const [notes, setNotes] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [noteToEdit, setNoteToEdit] = useState({});
+  const [openEditModal, setOpenEditModal] = useState(false);
 
   const navigate = useNavigate();
 
   React.useEffect(() => {
     fetchData();
-  },[]);
+  }, []);
 
   const fetchData = async () => {
-    try{
-      let response = await axios.get("http://localhost:8080/note",{
+    try {
+      let response = await axios.get("http://localhost:8080/note", {
         headers: {
           Authorization: localStorage.getItem("Authorization"),
         },
       });
 
-      setNotes(response.data)
-    }catch(error){
-      navigate('/');
+      setNotes(response.data);
+    } catch (error) {
+      navigate("/");
     }
   };
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -41,37 +43,52 @@ function Notes() {
 
   const handleDelete = (noteID) => {
     Swal.fire({
-      title: 'Are you sure?',
+      title: "Are you sure?",
       text: "You won't be able to revert this!",
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!'
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(
-            "http://localhost:8080/note/" + noteID,
-            {
-              headers: {
-                Authorization: localStorage.getItem("Authorization"),
-              },
-            }
-          );
+          await axios.delete("http://localhost:8080/note/" + noteID, {
+            headers: {
+              Authorization: localStorage.getItem("Authorization"),
+            },
+          });
 
-          Swal.fire(
-            'Deleted!',
-            'Your note has been deleted.',
-            'success'
-          );
+          Swal.fire("Deleted!", "Your note has been deleted.", "success");
 
           fetchData();
         } catch (error) {
           console.error(error);
         }
       }
-    })
+    });
+  };
+
+  const fetchEditData = async (id) => {
+    try {
+      let response = await axios.get("http://localhost:8080/note/" + id, {
+        headers: {
+          Authorization: localStorage.getItem("Authorization"),
+        },
+      });
+      setNoteToEdit(response.data);
+    } catch (error) {
+      console.info(error);
+    }
+  };
+
+  const handleEditNote = (id) => {
+    fetchEditData(id);
+    setOpenEditModal(true);
+  };
+
+  const closeEditModal = () => {
+    setOpenEditModal(false);
   };
 
   return (
@@ -85,7 +102,18 @@ function Notes() {
           New Note
         </button>
 
-        <CreateModal isOpen={isModalOpen} onClose={closeModal} onRefresh={fetchData} />
+        <CreateModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          onRefresh={fetchData}
+        />
+
+        <EditModal
+          isOpen={openEditModal}
+          onClose={closeEditModal}
+          onSave={fetchData}
+          note={noteToEdit}
+        />
 
         <div className="flex items-center justify-center ">
           <div className=" mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -104,10 +132,20 @@ function Notes() {
                         <FaInfoCircle />
                       </a>
                       <div>
-                        <button className="mr-2 text-red-600 hover:text-red-800" onClick={()=>{handleDelete(item.id)}}>
+                        <button
+                          className="mr-2 text-red-600 hover:text-red-800"
+                          onClick={() => {
+                            handleDelete(item.id);
+                          }}
+                        >
                           <FaTrash />
                         </button>
-                        <button className="text-yellow-600 hover:text-yellow-800">
+                        <button
+                          className="text-yellow-600 hover:text-yellow-800"
+                          onClick={() => {
+                            handleEditNote(item.id);
+                          }}
+                        >
                           <FaPencilAlt />
                         </button>
                       </div>
