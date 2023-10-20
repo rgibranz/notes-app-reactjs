@@ -1,26 +1,26 @@
 import { useState } from "react";
 import axios from "axios";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-function LoginForm(props) {
+export default function RegistrationForm() {
+  let [name, setName] = useState("");
   let [email, setEmail] = useState("");
   let [password, setPassword] = useState("");
   let [formError, setFormError] = useState("");
   let [formErrorList, setFormErrorList] = useState("");
 
-  const { state } = useLocation();
-
   const navigate = useNavigate();
-  const handleLogin = async (e) => {
+  const handleRegis = async (e) => {
     e.preventDefault();
     setFormError(undefined);
     setFormErrorList(undefined);
 
     axios
-      .post("http://localhost:8080/login", { email, password })
+      .post("http://localhost:8080/registration", { name, email, password })
       .then((response) => {
-        localStorage.setItem("Authorization", response.data.token);
-        navigate("/notes");
+        navigate("/login",{state:{
+          msg: "Registration Successful, Please Login"
+        }});
       })
       .catch((e) => {
         if (Array.isArray(e.response.data.error)) {
@@ -34,7 +34,7 @@ function LoginForm(props) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-gray-400">
       <div className="bg-white p-8 rounded shadow-md w-96">
-        <h2 className="text-2xl font-semibold mb-4 text-center">Login</h2>
+        <h2 className="text-2xl font-semibold mb-4 text-center">Registration</h2>
 
         {/*error bukan list*/}
         {formError && (
@@ -55,13 +55,19 @@ function LoginForm(props) {
             </ul>
           </div>
         )}
-
-        {state && (
-          <div className="bg-green-500 text-white p-2 rounded mb-4">
-            {state.msg}
+        <form onSubmit={handleRegis}>
+          <div className="mb-4">
+            <label htmlFor="name" className="block text-gray-600">
+              Full Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              className="w-full border-2 border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </div>
-        )}
-        <form onSubmit={handleLogin}>
           <div className="mb-4">
             <label htmlFor="email" className="block text-gray-600">
               Email
@@ -90,15 +96,13 @@ function LoginForm(props) {
             type="submit"
             className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition duration-300"
           >
-            Login
+            Register Account
           </button>
           <div className="text-center mt-3.5">
-            <a href="/registration">Registration</a>
+            <a href="/login">Login</a>
           </div>
         </form>
       </div>
     </div>
   );
 }
-
-export default LoginForm;
